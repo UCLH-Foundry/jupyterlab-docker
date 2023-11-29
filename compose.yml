@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  # Base image
+  jupyterlab:
+    image: criu-jupyterlab-standalone:latest
+    build:
+      context: .
+      args:
+        VOLUME_MOUNT_PATH: /home/jovyan/work
+
+  # Base service to be extended per user
+  base-user:
+    image: criu-jupyterlab-standalone:latest
+    command: ["start.sh", "jupyter", "lab",
+              "--LabApp.token=$JUPYTER_PASSWORD",
+              "--NotebookApp.notebook_dir=/home/jovyan/work",
+              "--ContentsManager.allow_hidden=true"]
+
+  # Duplicate this service per user
+  user-test:
+    extends: base-user
+    environment:
+      - JUPYTER_PASSWORD=${JUPYTER_PASSWORD_USER_TEST}
+    ports:
+      - "${JUPYTER_PORT_USER_TEST}:8888"
+    volumes:
+      - jupyter-volume-user-test:/home/jovyan/work
+
+volumes:
+  jupyter-volume-user-test:
