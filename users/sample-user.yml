@@ -20,6 +20,14 @@ services:
     volumes:
       - sample-user:/home/jovyan/work
 
+    # Isolate this service from other JupyterLab containers
+    networks:
+      - sample-user
+
 volumes:
+  sample-user:
+    name: criu-jupyterlab-sample-user
+
+networks:
   sample-user:
     name: criu-jupyterlab-sample-user
