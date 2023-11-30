@@ -1,2 +1,7 @@
 # Environment
 .env
+# Comment this to commit sample env files
+*/*.env
+
+# Individual user configuration files
+users/

@@ -2,7 +2,9 @@ FROM quay.io/jupyter/datascience-notebook:2023-11-07
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
 
-ARG VOLUME_MOUNT_PATH
+ARG JUPYTER_WORKDIR
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
 
 USER root
 
@@ -22,9 +24,6 @@ RUN apt-get update --yes && \
 RUN pip install --no-cache-dir pip==23.1.2 && \
     pip install --no-cache-dir pre-commit==3.3.3 nbstripout==0.6.1
 
-RUN mkdir -p ${VOLUME_MOUNT_PATH}
-RUN chown -R ${NB_UID}:${NB_GID} ${VOLUME_MOUNT_PATH}
-
 # Set up for Windows Authentication.
 RUN echo "[FreeTDS]" >> /etc/odbcinst.ini
 RUN echo "Description=FreeTDS" >> /etc/odbcinst.ini
@@ -32,6 +31,13 @@ RUN echo "Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so" >> /etc/odbcinst.
 RUN echo "Setup=/usr/lib/x86_64-linux-gnu/odbc/libtdsS.so" >> /etc/odbcinst.ini
 RUN echo "" >> /etc/odbcinst.ini
 
+RUN mkdir -p ${JUPYTER_WORKDIR}
+RUN chown -R ${NB_UID}:${NB_GID} ${JUPYTER_WORKDIR}
+
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
-WORKDIR ${VOLUME_MOUNT_PATH}
+WORKDIR ${JUPYTER_WORKDIR}
+
+COPY --chown=${NB_UID}:${NB_GID} entrypoint.sh /usr/bin/.
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT entrypoint.sh 

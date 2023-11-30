@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  # User-specific service. Create new YAML files per user.
+  # Service for user: NAME (EMAIL)
+  sample-user:
+    extends:
+      file: ../compose.yml
+      service: jupyterlab
+    container_name: criu-jupyterlab-sample-user
+    env_file:
+      - ../.env
+      - sample-user.env
+
+    # Make sure every user maps to a different port
+    ports:
+      - 12888:8888
+    
+    # Every user has a different volume, but they are all mapped to the same path
+    volumes:
+      - sample-user:/home/jovyan/work
+
+volumes:
+  sample-user:
+    name: criu-jupyterlab-sample-user
