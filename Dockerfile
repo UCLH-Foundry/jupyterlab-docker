@@ -11,18 +11,39 @@ USER root
 ENV MSSQL_DRIVER="ODBC Driver 18 for SQL Server"
 ENV PATH="/opt/mssql-tools18/bin:${PATH}"
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+###############################################################################
+# Install and update Linux packages                                           #
+###############################################################################
+
+# Add latest Ubuntu repos to sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse" | tee -a /etc/apt/sources.list && \
+    echo "deb http://archive.canonical.com/ubuntu/ jammy partner" | tee -a /etc/apt/sources.list && \
+    echo "deb-src http://archive.canonical.com/ubuntu/ jammy partner" | tee -a /etc/apt/sources.list
+
 # Generic Linux packages
 RUN apt-get update --yes && apt-get upgrade --yes && \
     apt-get install --yes --no-install-recommends gnupg2=2.2.27-3ubuntu2.1
 
-# In case people want to use ODBC drivers.
+# ODBC PostgreSQL drivers
+RUN apt-get install --yes libodbcinst2 unixodbc unixodbc-dev odbcinst odbc-postgresql && \
+    sed -i -r 's/=(psqlodbc(a|w).so|libodbcpsqlS.so)/=\/usr\/lib\/x86_64-linux-gnu\/odbc\/\1/' /etc/odbcinst.ini
+
+# ODBC SQL Server drivers
 RUN apt-get install --yes --no-install-recommends freetds-dev=1.3.6-1 freetds-bin=1.3.6-1 tdsodbc=1.3.6-1 && \
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg && \
     echo "deb [arch=amd64,armhf,arm64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" > /etc/apt/sources.list.d/microsoft.list && \
     apt-get update --yes && \
     ACCEPT_EULA=Y apt-get install --yes --no-install-recommends msodbcsql18=18.2.1.1-1
 
-# Set up for Windows Authentication.
+# Create SQL Server ODBC Driver: FreeTDS
 RUN echo "[FreeTDS]" >> /etc/odbcinst.ini
 RUN echo "Description=FreeTDS" >> /etc/odbcinst.ini
 RUN echo "Driver=/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so" >> /etc/odbcinst.ini
@@ -36,17 +57,51 @@ RUN wget -qO- https://packagecloud.io/github/git-lfs/gpgkey | gpg --dearmor > /u
     apt-get update --yes && \
     apt-get install --yes --no-install-recommends git-lfs && \
     su - jovyan && cd ~ && git lfs install && exit
-#RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+
+# Chrome (for Selenium)
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install --yes --no-install-recommends ./google-chrome-stable_current_amd64.deb && \
+    rm -f ./google-chrome-stable_current_amd64.deb
 
 # Clear packages not required during runtime
 RUN apt-get purge --yes gnupg2 && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
-RUN pip install --no-cache-dir pip==23.1.2 && \
-    pip install --no-cache-dir pre-commit==3.3.3 nbstripout==0.6.1
 
-# Prepare working directory
+###############################################################################
+# Conda, Python, R packages                                                   #
+###############################################################################
+
+# Upgrade Conda
+RUN conda update --y conda && \
+    conda update --all --y
+
+# Python dependencies
+#RUN pip install --no-cache-dir pip==23.1.2 && \
+#    pip install --no-cache-dir pre-commit==3.3.3 nbstripout==0.6.1
+
+RUN conda install --quiet --yes \
+      psycopg2 \
+      pyodbc \
+      pymssql
+
+# R minimum general-use dependencies
+RUN conda install --quiet --y --channel r \
+      r-bit64 \
+      r-arrow \
+      r-here \
+      r-tidyverse \
+      r-config \
+      r-odbc
+
+# Clean conda after install
+RUN conda clean --all --force-pkgs-dirs --y
+
+
+###############################################################################
+# Prepare working directory                                                   #
+###############################################################################
+
 RUN mkdir -p ${JUPYTER_WORKDIR}
 RUN chown -R ${NB_UID}:${NB_GID} ${JUPYTER_WORKDIR}
 
