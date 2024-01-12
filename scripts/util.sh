@@ -71,6 +71,7 @@ error() {
 #   See "confirm_or_abort" below.
 #
 await_confirmation() {
+  local MSG="Continue? (y/N): "
   local YES_OPTIONS=("y" "Y" "yes" "YES")
   local CONTINUE_YN=
 
@@ -80,11 +81,9 @@ await_confirmation() {
     return
   fi
 
-  if [ " $1 " == "  " ]
+  if [ " $1 " != "  " ]
   then
-    MSG="Continue? (y/N): "
-  else
-    MSG="$1 Continue? (y/N): "
+    printf "$1" > /dev/tty
   fi
 
   read -p "$MSG" CONTINUE_YN

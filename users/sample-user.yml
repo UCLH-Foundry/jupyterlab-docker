@@ -14,7 +14,7 @@ services:
 
     # Make sure every user maps to a different port
     ports:
-      - 12888:8888
+      - PORT:8888
     
     # Every user has a different volume, but they are all mapped to the same path
     volumes:
