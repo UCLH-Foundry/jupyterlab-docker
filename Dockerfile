@@ -63,6 +63,11 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     apt-get install --yes --no-install-recommends ./google-chrome-stable_current_amd64.deb && \
     rm -f ./google-chrome-stable_current_amd64.deb
 
+# Quarto
+RUN wget -q https://github.com/quarto-dev/quarto-cli/releases/download/v1.4.543/quarto-1.4.543-linux-amd64.deb && \
+    apt-get install --yes --no-install-recommends ./quarto-1.4.543-linux-amd64.deb && \
+    rm -f ./quarto-1.4.543-linux-amd64.deb
+
 # Clear packages not required during runtime
 RUN apt-get purge --yes gnupg2 && \
     apt-get autoremove --yes && apt-get clean --yes && rm -rf /var/lib/apt/lists/*

@@ -86,16 +86,19 @@ echo "----- Generating compose file $COMPOSE_FILE -----"
 if [ -f "$PORT_SEQ_FILE" ]
 then
   PORT=$(( $(cat "$PORT_SEQ_FILE") + 1 ))
+  PORT_QUARTO=$(( $PORT + 10000 ))
 else
   echo "The file with the last port number generated could not be found ($PORT_SEQ_FILE)."
-  echo "Please provide a port number for this user."
-  read -p "Port: " PORT
+  echo "Please provide a port numbers for this user."
+  read -p "JupyterLab Port: " PORT
+  read -p "Quarto preview Port: " PORT_QUARTO
 fi
 
 cp "$COMPOSE_FILE_TPL" "$COMPOSE_FILE"
 sed -e "s/$USERNAME_TPL/$USERNAME/" \
     -e "s/NAME/${NAME}/" \
     -e "s/EMAIL/${EMAIL}/" \
+    -e "s/PORT_QUARTO/${PORT_QUARTO}/" \
     -e "s/PORT/${PORT}/" \
     -i "$COMPOSE_FILE"
 

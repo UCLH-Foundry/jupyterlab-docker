@@ -4,7 +4,7 @@ services:
   # Base image, to be extended by user-specific services
   # Defines build configuration and basic runtime environment
   jupyterlab:
-    image: criu-jupyterlab-standalone:0.4.1
+    image: criu-jupyterlab-standalone:0.5.0
     build:
       context: .
       args:
