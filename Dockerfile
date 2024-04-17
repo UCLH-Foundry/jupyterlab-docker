@@ -77,6 +77,9 @@ RUN apt-get purge --yes gnupg2 && \
 # Conda, Python, R packages                                                   #
 ###############################################################################
 
+# Install packages as final user (prevents ~/.cache/conda to be owned by root)
+USER ${NB_UID}
+
 # Upgrade Conda
 RUN conda update --y conda && \
     conda update --all --y
@@ -101,6 +104,9 @@ RUN conda install --quiet --y --channel r \
 
 # Clean conda after install
 RUN conda clean --all --force-pkgs-dirs --y
+
+# Reset user to root to continue setup
+USER root
 
 
 ###############################################################################

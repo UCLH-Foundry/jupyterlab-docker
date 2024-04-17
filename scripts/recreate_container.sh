@@ -103,7 +103,7 @@ docker compose -f "$COMPOSE_FILE" stop $USERNAME
 echo
 echo "----- Deleting container -----"
 confirm_and_run \
-  "About to delete container $CONTAINER." \
+  "About to delete container $CONTAINER. " \
   docker container rm $CONTAINER
 
 echo
