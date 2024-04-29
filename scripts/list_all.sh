@@ -2,7 +2,7 @@
 # list_all.sh
 #
 # Lists all CRIU JupyterLab images and containers in existence.
-# 
+#
 # Usage:
 #   /bin/sh scripts/list_all.sh
 #

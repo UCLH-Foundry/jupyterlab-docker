@@ -116,4 +116,4 @@ WORKDIR ${JUPYTER_WORKDIR}
 
 COPY --chown=${NB_UID}:${NB_GID} entrypoint.sh /usr/bin/.
 RUN chmod +x /usr/bin/entrypoint.sh
-ENTRYPOINT entrypoint.sh 
+ENTRYPOINT entrypoint.sh
