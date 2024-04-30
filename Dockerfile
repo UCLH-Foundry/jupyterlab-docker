@@ -88,7 +88,8 @@ RUN conda update --y conda && \
 RUN conda install --quiet --yes \
       psycopg2 \
       pyodbc \
-      pymssql
+      pymssql \
+      pre-commit
 
 # R minimum general-use dependencies
 RUN conda install --quiet --y --channel r \
