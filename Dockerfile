@@ -91,7 +91,8 @@ RUN conda update --y conda && \
 RUN conda install --quiet --yes \
       psycopg2 \
       pyodbc \
-      pymssql
+      pymssql \
+      pre-commit
 
 # R minimum general-use dependencies
 RUN conda install --quiet --y --channel r \
@@ -122,4 +123,4 @@ WORKDIR ${JUPYTER_WORKDIR}
 
 COPY --chown=${NB_UID}:${NB_GID} entrypoint.sh /usr/bin/.
 RUN chmod +x /usr/bin/entrypoint.sh
-ENTRYPOINT entrypoint.sh 
+ENTRYPOINT entrypoint.sh

@@ -16,7 +16,7 @@ services:
     ports:
       - PORT:8888
       - PORT_QUARTO:9999
-    
+
     # Every user has a different volume, but they are all mapped to the same path
     volumes:
       - sample-user:/home/jovyan/work
